@@ -3,6 +3,7 @@ import { Mic, Square } from 'lucide-react'
 import Dashboard from './Dashboard'
 import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
+import Agendamentos from './Agendamentos'
 import './App.css'
 
 function App() {
@@ -43,7 +44,8 @@ function App() {
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onReset={handleReset} />
           <main className="main-content">
             {activeTab === 'Dashboard' && <Dashboard />}
-            {activeTab !== 'Dashboard' && (
+            {activeTab === 'Agendamentos' && <Agendamentos />}
+            {activeTab !== 'Dashboard' && activeTab !== 'Agendamentos' && (
               <div className="placeholder-screen">
                 <h2>{activeTab}</h2>
                 <p>Esta tela será construída em breve.</p>
