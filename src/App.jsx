@@ -4,6 +4,7 @@ import Dashboard from './Dashboard'
 import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
 import Agendamentos from './Agendamentos'
+import Transacoes from './Transacoes'
 import './App.css'
 
 function App() {
@@ -45,7 +46,9 @@ function App() {
           <main className="main-content">
             {activeTab === 'Dashboard' && <Dashboard />}
             {activeTab === 'Agendamentos' && <Agendamentos />}
-            {activeTab !== 'Dashboard' && activeTab !== 'Agendamentos' && (
+            {activeTab === 'Receitas' && <Transacoes tipo="RECEITA" />}
+            {activeTab === 'Despesas' && <Transacoes tipo="DESPESA" />}
+            {activeTab !== 'Dashboard' && activeTab !== 'Agendamentos' && activeTab !== 'Receitas' && activeTab !== 'Despesas' && (
               <div className="placeholder-screen">
                 <h2>{activeTab}</h2>
                 <p>Esta tela será construída em breve.</p>
