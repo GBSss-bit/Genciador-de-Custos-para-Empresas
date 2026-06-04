@@ -36,3 +36,41 @@
   font-size: 2rem;
   margin-bottom: 1rem;
 }
+
+/* Botão Flutuante de Áudio (Global) */
+.fab-mic {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-mic:hover {
+  background: var(--accent-hover);
+  transform: translateX(-50%) scale(1.05);
+}
+
+.fab-mic.recording {
+  background: var(--danger);
+  animation: pulse-recording 1.5s infinite;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse-recording {
+  0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+  100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

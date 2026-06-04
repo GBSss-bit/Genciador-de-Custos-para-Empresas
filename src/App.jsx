@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Mic, Square } from 'lucide-react'
 import Dashboard from './Dashboard'
 import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
@@ -11,6 +12,7 @@ function App() {
   })
   
   const [activeTab, setActiveTab] = useState('Dashboard')
+  const [isRecording, setIsRecording] = useState(false)
 
   const handleOnboardingComplete = () => {
     setIsOnboarded(true);
@@ -26,6 +28,14 @@ function App() {
 
   return (
     <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
+      <button 
+        className={`fab-mic ${isRecording ? 'recording' : ''}`}
+        onClick={() => setIsRecording(!isRecording)}
+        title="Falar com a Beluna"
+      >
+        {isRecording ? <Square size={28} /> : <Mic size={28} />}
+      </button>
+
       {!isOnboarded ? (
         <Onboarding onComplete={handleOnboardingComplete} />
       ) : (
