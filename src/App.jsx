@@ -15,6 +15,62 @@ function App() {
   
   const [activeTab, setActiveTab] = useState('Dashboard')
   const [isRecording, setIsRecording] = useState(false)
+  const recognitionRef = React.useRef(null)
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta reconhecimento de voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      
+      // Procura qual campo de texto o usuário clicou por último
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+        // Truque do React para forçar a atualização do campo e disparar o onChange
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        const newValue = activeEl.value ? activeEl.value + ' ' + transcript : transcript;
+        nativeInputValueSetter.call(activeEl, newValue);
+        
+        const inputEvent = new Event('input', { bubbles: true });
+        activeEl.dispatchEvent(inputEvent);
+      } else {
+        alert("🗣️ Você disse: " + transcript + "\n\n(Dica: Clique dentro de um campo de texto antes de falar para que o aplicativo digite automaticamente!)");
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Erro na gravação:", event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   const handleOnboardingComplete = () => {
     setIsOnboarded(true);
@@ -32,7 +88,7 @@ function App() {
     <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
       <button 
         className={`fab-mic ${isRecording ? 'recording' : ''}`}
-        onClick={() => setIsRecording(!isRecording)}
+        onClick={toggleRecording}
         title="Falar com a Beluna"
       >
         {isRecording ? <Square size={28} /> : <Mic size={28} />}
