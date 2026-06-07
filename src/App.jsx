@@ -88,6 +88,7 @@ function App() {
     <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
       <button 
         className={`fab-mic ${isRecording ? 'recording' : ''}`}
+        onMouseDown={(e) => e.preventDefault()}
         onClick={toggleRecording}
         title="Falar com a Beluna"
       >
