@@ -12,12 +12,26 @@ const Onboarding = ({ onComplete }) => {
   const [colaboradores, setColaboradores] = useState('');
   const [tipoEmpresa, setTipoEmpresa] = useState('MEI');
 
+  // Estados para a Etapa 2
+  const [aluguel, setAluguel] = useState('');
+  const [energia, setEnergia] = useState('');
+  const [agua, setAgua] = useState('');
+  const [limpeza, setLimpeza] = useState('');
+  const [internet, setInternet] = useState('');
+  const [software, setSoftware] = useState('');
+  const [contador, setContador] = useState('');
+  const [marketing, setMarketing] = useState('');
+  const [prolabore, setProlabore] = useState('');
+  const [salarios, setSalarios] = useState('');
+  const [beneficios, setBeneficios] = useState('');
+
   useEffect(() => {
     const handleSmartSpeech = (e) => {
-      const text = e.detail.toLowerCase();
+      const latestText = e.detail.latest.toLowerCase();
+      const fullText = e.detail.full.toLowerCase();
 
-      // Comando de voz Global: Avançar Etapa
-      if (text.includes('próximo') || text.includes('proximo') || text.includes('avançar') || text.includes('continuar')) {
+      // Comando de voz Global: Avançar Etapa (usa apenas a última frase falada para não repetir comandos antigos)
+      if (latestText.includes('próximo') || latestText.includes('proximo') || latestText.includes('avançar') || latestText.includes('continuar')) {
         if (step < 3) {
           setStep((prev) => Math.min(prev + 1, 3));
         } else {
@@ -26,34 +40,68 @@ const Onboarding = ({ onComplete }) => {
         return; // Para não misturar com o texto dos formulários
       }
 
-      if (step !== 1) return; // A inteligência dos campos está ativada apenas na etapa 1 por enquanto
-      
-      
-      const extract = (regex) => {
+      const extract = (text, regex) => {
         const match = text.match(regex);
         return match ? match[1].trim() : null;
       };
 
-      // Palavras de parada para delimitar onde o campo termina
-      const stops = "segmento|cidade|colaboradores|colaborador|funcionários|funcionário|tipo";
-      
-      const nEmpresa = extract(new RegExp(`(?:nome da empresa|empresa)\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
-      const nSegmento = extract(new RegExp(`segmento\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
-      const nCidade = extract(new RegExp(`cidade\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
-      const nColab = extract(new RegExp(`(?:colaboradores|colaborador|funcionários|funcionário)\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
-      const nTipo = extract(new RegExp(`(?:tipo de empresa|tipo)\\s+(.*)`, 'i'));
+      if (step === 1) {
+        const stops = "segmento|cidade|colaboradores|colaborador|funcionários|funcionário|tipo";
+        const nEmpresa = extract(fullText, new RegExp(`(?:nome da empresa|empresa)\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
+        const nSegmento = extract(fullText, new RegExp(`segmento\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
+        const nCidade = extract(fullText, new RegExp(`cidade\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
+        const nColab = extract(fullText, new RegExp(`(?:colaboradores|colaborador|funcionários|funcionário)\\s+(.*?)(?=\\s+(?:${stops})|$)`, 'i'));
+        const nTipo = extract(fullText, new RegExp(`(?:tipo de empresa|tipo)\\s+(.*)`, 'i'));
 
-      const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+        const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-      if (nEmpresa) setEmpresa(capitalize(nEmpresa));
-      if (nSegmento) setSegmento(capitalize(nSegmento));
-      if (nCidade) setCidade(capitalize(nCidade));
-      if (nColab) setColaboradores(nColab.replace(/\D/g, ''));
-      
-      if (nTipo) {
-        if (nTipo.includes('mei')) setTipoEmpresa('MEI');
-        else if (nTipo.includes('limitada') || nTipo.includes('ltda')) setTipoEmpresa('LTDA');
-        else if (nTipo.includes('individual')) setTipoEmpresa('Empresário Individual (EI)');
+        if (nEmpresa) setEmpresa(capitalize(nEmpresa));
+        if (nSegmento) setSegmento(capitalize(nSegmento));
+        if (nCidade) setCidade(capitalize(nCidade));
+        if (nColab) setColaboradores(nColab.replace(/\D/g, ''));
+        
+        if (nTipo) {
+          if (nTipo.includes('mei')) setTipoEmpresa('MEI');
+          else if (nTipo.includes('limitada') || nTipo.includes('ltda')) setTipoEmpresa('LTDA');
+          else if (nTipo.includes('individual')) setTipoEmpresa('Empresário Individual (EI)');
+        }
+      }
+
+      if (step === 2) {
+        const extractMoney = (regex) => {
+          const match = fullText.match(regex);
+          if (match) {
+             let val = match[1].replace(/[^\d,.]/g, ''); // Retira tudo que não for número, vírgula ou ponto
+             return val ? val : null;
+          }
+          return null;
+        };
+
+        const stops2 = "aluguel|energia|luz|água|agua|limpeza|material|internet|telefone|software|tráfego|contador|contabilidade|marketing|pró-labore|prolabore|salário|salários|benefícios";
+
+        const nAluguel = extractMoney(new RegExp(`aluguel\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nEnergia = extractMoney(new RegExp(`(?:energia|luz)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nAgua = extractMoney(new RegExp(`(?:água|agua)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nLimpeza = extractMoney(new RegExp(`(?:limpeza|material de limpeza)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nInternet = extractMoney(new RegExp(`(?:internet|telefone)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nSoftware = extractMoney(new RegExp(`(?:software|tráfego)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nContador = extractMoney(new RegExp(`(?:contador|contabilidade)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nMarketing = extractMoney(new RegExp(`marketing\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nProlabore = extractMoney(new RegExp(`(?:pró-labore|prolabore|salário do dono)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nSalarios = extractMoney(new RegExp(`(?:salários da equipe|salário da equipe|salários|salário)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+        const nBeneficios = extractMoney(new RegExp(`(?:benefícios da equipe|benefícios|beneficio)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
+
+        if (nAluguel) setAluguel(nAluguel);
+        if (nEnergia) setEnergia(nEnergia);
+        if (nAgua) setAgua(nAgua);
+        if (nLimpeza) setLimpeza(nLimpeza);
+        if (nInternet) setInternet(nInternet);
+        if (nSoftware) setSoftware(nSoftware);
+        if (nContador) setContador(nContador);
+        if (nMarketing) setMarketing(nMarketing);
+        if (nProlabore) setProlabore(nProlabore);
+        if (nSalarios) setSalarios(nSalarios);
+        if (nBeneficios) setBeneficios(nBeneficios);
       }
     };
 
@@ -119,17 +167,17 @@ const Onboarding = ({ onComplete }) => {
               <h3>2. Custos Fixos (Mensais)</h3>
               <p className="hint">Aqueles que não mudam, independentemente do quanto você vende.</p>
               <div className="grid-inputs">
-                <div className="form-group"><label>Aluguel</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Energia</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Água</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Material de limpeza</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Internet / Telefone</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Software / Tráfego</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Contador</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Marketing</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Pró-labore (Salário do Dono)</label><input type="text" placeholder="R$ 0,00" /></div>
-                <div className="form-group"><label>Salários da Equipe (Funcionários)</label><input type="text" placeholder="R$ Soma de todos" /></div>
-                <div className="form-group"><label>Benefícios da Equipe</label><input type="text" placeholder="R$ 0,00" /></div>
+                <div className="form-group"><label>Aluguel</label><input type="text" placeholder="R$ 0,00" value={aluguel} onChange={e => setAluguel(e.target.value)} /></div>
+                <div className="form-group"><label>Energia</label><input type="text" placeholder="R$ 0,00" value={energia} onChange={e => setEnergia(e.target.value)} /></div>
+                <div className="form-group"><label>Água</label><input type="text" placeholder="R$ 0,00" value={agua} onChange={e => setAgua(e.target.value)} /></div>
+                <div className="form-group"><label>Material de limpeza</label><input type="text" placeholder="R$ 0,00" value={limpeza} onChange={e => setLimpeza(e.target.value)} /></div>
+                <div className="form-group"><label>Internet / Telefone</label><input type="text" placeholder="R$ 0,00" value={internet} onChange={e => setInternet(e.target.value)} /></div>
+                <div className="form-group"><label>Software / Tráfego</label><input type="text" placeholder="R$ 0,00" value={software} onChange={e => setSoftware(e.target.value)} /></div>
+                <div className="form-group"><label>Contador</label><input type="text" placeholder="R$ 0,00" value={contador} onChange={e => setContador(e.target.value)} /></div>
+                <div className="form-group"><label>Marketing</label><input type="text" placeholder="R$ 0,00" value={marketing} onChange={e => setMarketing(e.target.value)} /></div>
+                <div className="form-group"><label>Pró-labore (Salário do Dono)</label><input type="text" placeholder="R$ 0,00" value={prolabore} onChange={e => setProlabore(e.target.value)} /></div>
+                <div className="form-group"><label>Salários da Equipe (Funcionários)</label><input type="text" placeholder="R$ Soma de todos" value={salarios} onChange={e => setSalarios(e.target.value)} /></div>
+                <div className="form-group"><label>Benefícios da Equipe</label><input type="text" placeholder="R$ 0,00" value={beneficios} onChange={e => setBeneficios(e.target.value)} /></div>
               </div>
             </div>
           )}

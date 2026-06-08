@@ -66,9 +66,11 @@ function App() {
           activeEl.dispatchEvent(inputEvent);
         }
       } else {
-        // Se NÃO clicou em campo nenhum, manda a frase INTEIRA acumulada pro cérebro do Onboarding fatiar
+        // Envia tanto a frase acumulada quanto a última palavra isolada para evitar bugs de navegação
         if (fullTranscript.trim() !== '') {
-          const smartEvent = new CustomEvent('smartSpeech', { detail: fullTranscript });
+          const smartEvent = new CustomEvent('smartSpeech', { 
+            detail: { full: fullTranscript, latest: newFinalText } 
+          });
           window.dispatchEvent(smartEvent);
         }
       }
