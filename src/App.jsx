@@ -34,30 +34,43 @@ function App() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
-    recognition.continuous = false;
+    recognition.continuous = true; // Mantém o microfone ligado direto!
     recognition.interimResults = false;
+
+    let fullTranscript = ''; // Acumulador de tudo que foi falado enquanto o mic tá ligado
 
     recognition.onstart = () => {
       setIsRecording(true);
     };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
+      let newFinalText = '';
       
-      // Procura qual campo de texto o usuário clicou por último
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          newFinalText += event.results[i][0].transcript + ' ';
+          fullTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+
       const activeEl = document.activeElement;
+      
+      // Se tiver clicado num campo, vai digitando aos poucos conforme a pessoa fala
       if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
-        // Truque do React para forçar a atualização do campo e disparar o onChange
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-        const newValue = activeEl.value ? activeEl.value + ' ' + transcript : transcript;
-        nativeInputValueSetter.call(activeEl, newValue);
-        
-        const inputEvent = new Event('input', { bubbles: true });
-        activeEl.dispatchEvent(inputEvent);
+        if (newFinalText.trim() !== '') {
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+          const newValue = activeEl.value ? activeEl.value + ' ' + newFinalText.trim() : newFinalText.trim();
+          nativeInputValueSetter.call(activeEl, newValue);
+          
+          const inputEvent = new Event('input', { bubbles: true });
+          activeEl.dispatchEvent(inputEvent);
+        }
       } else {
-        // Dispara o evento de "Fale Tudo" para que as telas tentem entender a frase usando IA Simples
-        const smartEvent = new CustomEvent('smartSpeech', { detail: transcript });
-        window.dispatchEvent(smartEvent);
+        // Se NÃO clicou em campo nenhum, manda a frase INTEIRA acumulada pro cérebro do Onboarding fatiar
+        if (fullTranscript.trim() !== '') {
+          const smartEvent = new CustomEvent('smartSpeech', { detail: fullTranscript });
+          window.dispatchEvent(smartEvent);
+        }
       }
     };
 
