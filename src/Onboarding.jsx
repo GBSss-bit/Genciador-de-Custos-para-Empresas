@@ -14,9 +14,20 @@ const Onboarding = ({ onComplete }) => {
 
   useEffect(() => {
     const handleSmartSpeech = (e) => {
-      if (step !== 1) return; // A inteligência está ativada apenas na etapa 1 por enquanto
-      
       const text = e.detail.toLowerCase();
+
+      // Comando de voz Global: Avançar Etapa
+      if (text.includes('próximo') || text.includes('proximo') || text.includes('avançar') || text.includes('continuar')) {
+        if (step < 3) {
+          setStep((prev) => Math.min(prev + 1, 3));
+        } else {
+          onComplete(); // Se falar 'próximo' na última etapa, finaliza e vai pro Dashboard!
+        }
+        return; // Para não misturar com o texto dos formulários
+      }
+
+      if (step !== 1) return; // A inteligência dos campos está ativada apenas na etapa 1 por enquanto
+      
       
       const extract = (regex) => {
         const match = text.match(regex);
