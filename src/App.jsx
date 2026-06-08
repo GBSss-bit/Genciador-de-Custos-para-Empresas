@@ -55,7 +55,9 @@ function App() {
         const inputEvent = new Event('input', { bubbles: true });
         activeEl.dispatchEvent(inputEvent);
       } else {
-        alert("🗣️ Você disse: " + transcript + "\n\n(Dica: Clique dentro de um campo de texto antes de falar para que o aplicativo digite automaticamente!)");
+        // Dispara o evento de "Fale Tudo" para que as telas tentem entender a frase usando IA Simples
+        const smartEvent = new CustomEvent('smartSpeech', { detail: transcript });
+        window.dispatchEvent(smartEvent);
       }
     };
 
