@@ -253,7 +253,7 @@ const Onboarding = ({ onComplete }) => {
             </button>
           ) : (
             <button className="btn-success" onClick={onComplete}>
-              <CheckCircle2 size={18} /> Ver Dashboard
+              <CheckCircle2 size={18} /> Dashboard
             </button>
           )}
         </div>
