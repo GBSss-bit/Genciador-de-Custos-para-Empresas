@@ -7,6 +7,37 @@ import Agendamentos from './Agendamentos'
 import Transacoes from './Transacoes'
 import './App.css'
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, info: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error("ErrorBoundary capturou um erro:", error, info);
+    this.setState({ info });
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: 'red', background: '#111', minHeight: '100vh' }}>
+          <h2>Ops! O aplicativo encontrou um erro.</h2>
+          <p>Por favor, tire um print desta tela e envie:</p>
+          <pre style={{ background: '#222', padding: '1rem', overflow: 'auto' }}>
+            {this.state.error && this.state.error.toString()}
+            <br />
+            {this.state.info && this.state.info.componentStack}
+          </pre>
+          <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', marginTop: '20px' }}>Recarregar Aplicativo</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   // Lê do navegador se o usuário já finalizou o onboarding antes
   const [isOnboarded, setIsOnboarded] = useState(() => {
@@ -167,7 +198,8 @@ function App() {
   }
 
   return (
-    <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
+    <ErrorBoundary>
+      <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
       {transcriptPreview && (
         <div className="transcript-preview">
           "{transcriptPreview}"
@@ -202,6 +234,7 @@ function App() {
         </>
       )}
     </div>
+    </ErrorBoundary>
   )
 }
 
