@@ -86,7 +86,6 @@ function App() {
       utterance.voice = bestVoice;
     }
 
-    // Pausa o microfone para ela não escutar a própria voz
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
@@ -100,6 +99,8 @@ function App() {
       }
     };
 
+    // Limpa a fila do navegador caso ele tenha "engasgado" com falas anteriores (muito comum no Chrome)
+    synth.cancel();
     synth.speak(utterance);
   };
 
