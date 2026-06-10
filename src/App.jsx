@@ -5,6 +5,7 @@ import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
 import Agendamentos from './Agendamentos'
 import Transacoes from './Transacoes'
+import belunaVoice from './voz.mp3.mp3'
 import './App.css'
 
 class ErrorBoundary extends React.Component {
@@ -66,10 +67,8 @@ function App() {
       recognitionRef.current.stop();
     }
 
-    // Truque Mágico: Usa a voz Neural da Amazon Polly (Voz: Camila ou Vitoria), que é absurdamente humana!
-    // Acessado através da API pública do StreamElements.
-    const url = `https://api.streamelements.com/kappa/v2/speech?voice=Camila&text=${encodeURIComponent(text)}`;
-    const audio = new Audio(url);
+    // Usa a sua voz personalizada importada localmente!
+    const audio = new Audio(belunaVoice);
 
     audio.onended = () => {
       // Quando ela terminar de falar, o microfone volta a ouvir automaticamente
@@ -81,16 +80,7 @@ function App() {
     };
 
     audio.play().catch(e => {
-      console.error("Erro ao tocar áudio neural. Tentando a voz do navegador como backup.", e);
-      // Plano B: Se a API falhar, cai pra voz do navegador
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'pt-BR';
-      utterance.rate = 1.15;
-      synth.cancel();
-      
-      utterance.onend = audio.onended;
-      synth.speak(utterance);
+      console.error("Erro ao tocar áudio personalizado", e);
     });
   };
 
