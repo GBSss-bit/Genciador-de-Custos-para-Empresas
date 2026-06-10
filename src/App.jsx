@@ -24,7 +24,28 @@ function App() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     utterance.rate = 1.0;
-    utterance.pitch = 1.1; // Voz ligeiramente mais aguda para soar como assistente
+    utterance.pitch = 1.0; // Tom neutro para soar humana e profissional, não sensual/aguda
+
+    // Tenta encontrar a voz mais humana e feminina disponível no navegador
+    const voices = synth.getVoices();
+    const ptVoices = voices.filter(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
+    
+    // Prioriza vozes femininas de alta qualidade (Chrome, Edge ou iOS)
+    let bestVoice = ptVoices.find(v => 
+      v.name.includes('Google português do Brasil') || // Chrome (Feminina e limpa)
+      v.name.includes('Francisca') || // Edge Natural (Muito humana)
+      v.name.includes('Luciana') || // iOS/Mac
+      v.name.includes('Letícia')
+    );
+
+    // Se não achar as Premium, tenta pegar qualquer uma que não seja a voz masculina robótica comum (Daniel/Thiago)
+    if (!bestVoice && ptVoices.length > 0) {
+      bestVoice = ptVoices.find(v => !v.name.includes('Daniel') && !v.name.includes('Thiago')) || ptVoices[0];
+    }
+
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+    }
 
     // Pausa o microfone para ela não escutar a própria voz
     if (recognitionRef.current) {
