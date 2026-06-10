@@ -58,19 +58,41 @@ function App() {
       };
     }
   }, []);
-  // Função para a IA responder de forma dinâmica lendo os dados da tela (Usando a voz avançada Amazon Polly)
+  // Função para a IA responder de forma dinâmica (Tenta Amazon Polly, se falhar usa o navegador)
   const speakCamila = (text) => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-    const url = `https://api.streamelements.com/kappa/v2/speech?voice=Camila&text=${encodeURIComponent(text)}`;
-    const audio = new Audio(url);
-    audio.onended = () => {
+    
+    const onEndCallback = () => {
       if (recognitionRef.current) {
         try { recognitionRef.current.start(); } catch(e) {}
       }
     };
-    audio.play().catch(e => console.error("Erro no áudio da Camila", e));
+
+    const url = `https://api.streamelements.com/kappa/v2/speech?voice=Camila&text=${encodeURIComponent(text)}`;
+    const audio = new Audio(url);
+    audio.onended = onEndCallback;
+    
+    audio.play().catch(e => {
+      console.error("Erro no áudio da Camila (Pode ser bloqueio de AdBlock). Usando voz nativa de backup:", e);
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1.1;
+      
+      const voices = synth.getVoices();
+      const ptVoices = voices.filter(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR') || v.lang === 'pt');
+      let bestVoice = ptVoices.find(v => {
+        const name = v.name.toLowerCase();
+        return name.includes('google') || name.includes('francisca') || name.includes('luciana') || name.includes('letícia') || name.includes('online');
+      });
+      if (bestVoice) utterance.voice = bestVoice;
+
+      synth.cancel(); // Limpa engasgos do Chrome
+      utterance.onend = onEndCallback;
+      synth.speak(utterance);
+    });
   };
 
   const toggleRecording = () => {
