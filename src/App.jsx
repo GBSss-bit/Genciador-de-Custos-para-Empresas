@@ -61,36 +61,17 @@ function App() {
   
   // Função para a Beluna falar com o usuário
   const speakBeluna = (text) => {
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    utterance.rate = 1.15; // Velocidade um pouco maior tira a sensação "arrastada/lenta"
-    utterance.pitch = 1.0; 
-
-    const voices = synth.getVoices();
-    const ptVoices = voices.filter(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR') || v.lang === 'pt');
-    
-    // Procura voz feminina e de rede (que são infinitamente mais naturais)
-    let bestVoice = ptVoices.find(v => {
-      const name = v.name.toLowerCase();
-      return name.includes('google') || name.includes('francisca') || name.includes('luciana') || name.includes('letícia') || name.includes('online');
-    });
-
-    if (!bestVoice && ptVoices.length > 0) {
-      // Se não achar a do Google, pega a última disponível (frequentemente a melhor no Windows) pulando o Daniel
-      const femininas = ptVoices.filter(v => !v.name.toLowerCase().includes('daniel') && !v.name.toLowerCase().includes('thiago'));
-      bestVoice = femininas.length > 0 ? femininas[femininas.length - 1] : ptVoices[0];
-    }
-
-    if (bestVoice) {
-      utterance.voice = bestVoice;
-    }
-
+    // Pausa o microfone para ela não escutar a própria voz
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
 
-    utterance.onend = () => {
+    // Truque Mágico: Usa a voz Neural da Amazon Polly (Voz: Camila ou Vitoria), que é absurdamente humana!
+    // Acessado através da API pública do StreamElements.
+    const url = `https://api.streamelements.com/kappa/v2/speech?voice=Camila&text=${encodeURIComponent(text)}`;
+    const audio = new Audio(url);
+
+    audio.onended = () => {
       // Quando ela terminar de falar, o microfone volta a ouvir automaticamente
       if (recognitionRef.current) {
         try {
@@ -99,9 +80,18 @@ function App() {
       }
     };
 
-    // Limpa a fila do navegador caso ele tenha "engasgado" com falas anteriores (muito comum no Chrome)
-    synth.cancel();
-    synth.speak(utterance);
+    audio.play().catch(e => {
+      console.error("Erro ao tocar áudio neural. Tentando a voz do navegador como backup.", e);
+      // Plano B: Se a API falhar, cai pra voz do navegador
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1.15;
+      synth.cancel();
+      
+      utterance.onend = audio.onended;
+      synth.speak(utterance);
+    });
   };
 
   const toggleRecording = () => {
