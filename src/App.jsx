@@ -56,6 +56,8 @@ function App() {
       window.speechSynthesis.onvoiceschanged = () => {
         window.speechSynthesis.getVoices();
       };
+    }
+  }, []);
   // Função para a IA responder de forma dinâmica lendo os dados da tela (Usando a voz avançada Amazon Polly)
   const speakCamila = (text) => {
     if (recognitionRef.current) {
