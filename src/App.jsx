@@ -15,6 +15,7 @@ function App() {
   
   const [activeTab, setActiveTab] = useState('Dashboard')
   const [isRecording, setIsRecording] = useState(false)
+  const [transcriptPreview, setTranscriptPreview] = useState('')
   const recognitionRef = React.useRef(null)
 
   const toggleRecording = () => {
@@ -23,6 +24,7 @@ function App() {
         recognitionRef.current.stop();
       }
       setIsRecording(false);
+      setTranscriptPreview('');
       return;
     }
 
@@ -52,6 +54,8 @@ function App() {
           fullTranscript += event.results[i][0].transcript + ' ';
         }
       }
+      
+      setTranscriptPreview(fullTranscript);
 
       const activeEl = document.activeElement;
       
@@ -83,6 +87,7 @@ function App() {
 
     recognition.onend = () => {
       setIsRecording(false);
+      setTimeout(() => setTranscriptPreview(''), 4000);
     };
 
     recognitionRef.current = recognition;
@@ -103,6 +108,11 @@ function App() {
 
   return (
     <div className={`app-container ${!isOnboarded ? 'onboarding-mode' : ''}`}>
+      {transcriptPreview && (
+        <div className="transcript-preview">
+          "{transcriptPreview}"
+        </div>
+      )}
       <button 
         className={`fab-mic ${isRecording ? 'recording' : ''}`}
         onMouseDown={(e) => e.preventDefault()}
