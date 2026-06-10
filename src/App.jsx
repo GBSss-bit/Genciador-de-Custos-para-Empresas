@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Mic, Square } from 'lucide-react'
 import Dashboard from './Dashboard'
 import Onboarding from './Onboarding'
