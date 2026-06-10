@@ -133,8 +133,8 @@ function App() {
           
           // Inteligência Artificial de Conversação
           const latestLower = newFinalText.toLowerCase();
-          if (latestLower.includes('bom dia beluna') || latestLower.includes('bom dia, beluna') || latestLower.includes('bom dia pílula') || latestLower.includes('bom dia belluna')) {
-            speakBeluna("Bom dia! Estou pronta para te ajudar hoje.");
+          if (latestLower.includes('bom dia') || latestLower.includes('boa tarde') || latestLower.includes('boa noite') || latestLower.includes('olá')) {
+            speakBeluna("Olá! Estou pronta para te ajudar hoje.");
           }
         }
       }
