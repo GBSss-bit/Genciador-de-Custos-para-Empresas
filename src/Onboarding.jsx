@@ -25,6 +25,10 @@ const Onboarding = ({ onComplete }) => {
   const [salarios, setSalarios] = useState('');
   const [beneficios, setBeneficios] = useState('');
 
+  // Estados para a Etapa 3
+  const [comissoes, setComissoes] = useState('');
+  const [insumos, setInsumos] = useState('');
+
   useEffect(() => {
     const handleSmartSpeech = (e) => {
       const latestText = e.detail.latest.toLowerCase();
@@ -102,6 +106,27 @@ const Onboarding = ({ onComplete }) => {
         if (nProlabore) setProlabore(nProlabore);
         if (nSalarios) setSalarios(nSalarios);
         if (nBeneficios) setBeneficios(nBeneficios);
+      }
+
+      if (step === 3) {
+        const extractValue = (regex) => {
+          const match = fullText.match(regex);
+          if (match) {
+             let val = match[1].replace(/[^\d,.]/g, ''); // Retira tudo que não for número, vírgula ou ponto
+             // Se tiver dito % ou por cento, a gente preserva
+             if (match[1].includes('%') || match[1].includes('por cento')) val += '%';
+             return val ? val : null;
+          }
+          return null;
+        };
+
+        const stops3 = "comissões|comissão|custos|produtos|insumos|produto|insumo";
+
+        const nComissoes = extractValue(new RegExp(`(?:comissões|comissão)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
+        const nInsumos = extractValue(new RegExp(`(?:custos|produtos|insumos|produto|insumo)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
+
+        if (nComissoes) setComissoes(nComissoes);
+        if (nInsumos) setInsumos(nInsumos);
       }
     };
 
@@ -187,8 +212,8 @@ const Onboarding = ({ onComplete }) => {
               <h3>3. Custos Variáveis</h3>
               <p className="hint">Aqueles que sobem quando você vende mais.</p>
               <div className="grid-inputs">
-                <div className="form-group"><label>Comissões (Total pago no mês)</label><input type="text" placeholder="R$ 0,00 ou %" /></div>
-                <div className="form-group"><label>Custos com Produtos / Insumos</label><input type="text" placeholder="R$ 0,00" /></div>
+                <div className="form-group"><label>Comissões (Total pago no mês)</label><input type="text" placeholder="R$ 0,00 ou %" value={comissoes} onChange={e => setComissoes(e.target.value)} /></div>
+                <div className="form-group"><label>Custos com Produtos / Insumos</label><input type="text" placeholder="R$ 0,00" value={insumos} onChange={e => setInsumos(e.target.value)} /></div>
               </div>
             </div>
           )}
