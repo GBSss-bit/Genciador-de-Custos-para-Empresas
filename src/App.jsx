@@ -17,6 +17,31 @@ function App() {
   const [isRecording, setIsRecording] = useState(false)
   const [transcriptPreview, setTranscriptPreview] = useState('')
   const recognitionRef = React.useRef(null)
+  
+  // Função para a Beluna falar com o usuário
+  const speakBeluna = (text) => {
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.1; // Voz ligeiramente mais aguda para soar como assistente
+
+    // Pausa o microfone para ela não escutar a própria voz
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
+    utterance.onend = () => {
+      // Quando ela terminar de falar, o microfone volta a ouvir automaticamente
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+        } catch(e) {} // Ignora se já estiver iniciado
+      }
+    };
+
+    synth.speak(utterance);
+  };
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -76,6 +101,12 @@ function App() {
             detail: { full: fullTranscript, latest: newFinalText } 
           });
           window.dispatchEvent(smartEvent);
+          
+          // Inteligência Artificial de Conversação
+          const latestLower = newFinalText.toLowerCase();
+          if (latestLower.includes('bom dia beluna') || latestLower.includes('bom dia, beluna') || latestLower.includes('bom dia pílula') || latestLower.includes('bom dia belluna')) {
+            speakBeluna("Bom dia! Estou pronta para te ajudar hoje.");
+          }
         }
       }
     };

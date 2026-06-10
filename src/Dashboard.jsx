@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Bell, TrendingUp, Clock, ShieldAlert } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
@@ -13,6 +13,15 @@ const data = [
 ];
 
 const Dashboard = () => {
+  const [showChart, setShowChart] = useState(false);
+
+  useEffect(() => {
+    // Atraso de 200ms para renderizar o gráfico pesado da Recharts
+    // Isso garante que a transição de tela do Onboarding seja instantânea
+    const timer = setTimeout(() => setShowChart(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="dashboard">
       <header className="dashboard-header">
@@ -63,15 +72,21 @@ const Dashboard = () => {
             <a href="#">Ver relatório</a>
           </div>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9292a0', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9292a0', fontSize: 12}} />
-                <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: '#272732', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff'}} />
-                <Bar dataKey="Receitas" fill="#7aa2f7" radius={[4, 4, 0, 0]} barSize={24} />
-                <Bar dataKey="Despesas" fill="#fb923c" radius={[4, 4, 0, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
+            {showChart ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9292a0', fontSize: 12}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#9292a0', fontSize: 12}} />
+                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: '#272732', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff'}} />
+                  <Bar dataKey="Receitas" fill="#7aa2f7" radius={[4, 4, 0, 0]} barSize={24} />
+                  <Bar dataKey="Despesas" fill="#fb923c" radius={[4, 4, 0, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '250px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', animation: 'pulse 1.5s infinite' }}>
+                Carregando visão financeira...
+              </div>
+            )}
             <div className="chart-legend">
               <div className="legend-item"><span className="dot dot-receita"></span> Receitas</div>
               <div className="legend-item"><span className="dot dot-despesa"></span> Despesas</div>

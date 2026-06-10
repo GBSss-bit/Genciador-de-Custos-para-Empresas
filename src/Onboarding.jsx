@@ -29,6 +29,17 @@ const Onboarding = ({ onComplete }) => {
   const [comissoes, setComissoes] = useState('');
   const [insumos, setInsumos] = useState('');
 
+  // Formatação automática para R$
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    let num = value.replace(/[^\d]/g, '');
+    if (!num) return '';
+    num = parseInt(num, 10).toString(); // remove zeros à esquerda
+    // Formata milhar: 1000 -> 1.000
+    num = num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `R$ ${num}`;
+  };
+
   useEffect(() => {
     const handleSmartSpeech = (e) => {
       const latestText = e.detail.latest.toLowerCase();
@@ -95,17 +106,17 @@ const Onboarding = ({ onComplete }) => {
         const nSalarios = extractMoney(new RegExp(`(?:salários da equipe|salário da equipe|salários|salário)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
         const nBeneficios = extractMoney(new RegExp(`(?:benefícios da equipe|benefícios|beneficio)\\s+(.*?)(?=\\s+(?:${stops2})|$)`, 'i'));
 
-        if (nAluguel) setAluguel(nAluguel);
-        if (nEnergia) setEnergia(nEnergia);
-        if (nAgua) setAgua(nAgua);
-        if (nLimpeza) setLimpeza(nLimpeza);
-        if (nInternet) setInternet(nInternet);
-        if (nSoftware) setSoftware(nSoftware);
-        if (nContador) setContador(nContador);
-        if (nMarketing) setMarketing(nMarketing);
-        if (nProlabore) setProlabore(nProlabore);
-        if (nSalarios) setSalarios(nSalarios);
-        if (nBeneficios) setBeneficios(nBeneficios);
+        if (nAluguel) setAluguel(formatCurrency(nAluguel));
+        if (nEnergia) setEnergia(formatCurrency(nEnergia));
+        if (nAgua) setAgua(formatCurrency(nAgua));
+        if (nLimpeza) setLimpeza(formatCurrency(nLimpeza));
+        if (nInternet) setInternet(formatCurrency(nInternet));
+        if (nSoftware) setSoftware(formatCurrency(nSoftware));
+        if (nContador) setContador(formatCurrency(nContador));
+        if (nMarketing) setMarketing(formatCurrency(nMarketing));
+        if (nProlabore) setProlabore(formatCurrency(nProlabore));
+        if (nSalarios) setSalarios(formatCurrency(nSalarios));
+        if (nBeneficios) setBeneficios(formatCurrency(nBeneficios));
       }
 
       if (step === 3) {
@@ -113,8 +124,9 @@ const Onboarding = ({ onComplete }) => {
           const match = fullText.match(regex);
           if (match) {
              let val = match[1].replace(/[^\d,.]/g, ''); // Retira tudo que não for número, vírgula ou ponto
-             // Se tiver dito % ou por cento, a gente preserva
-             if (match[1].includes('%') || match[1].includes('por cento')) val += '%';
+             if (match[1].includes('%') || match[1].includes('por cento')) {
+               return val ? val + '%' : null;
+             }
              return val ? val : null;
           }
           return null;
@@ -125,8 +137,8 @@ const Onboarding = ({ onComplete }) => {
         const nComissoes = extractValue(new RegExp(`(?:comissões|comissão)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
         const nInsumos = extractValue(new RegExp(`(?:custos|produtos|insumos|produto|insumo)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
 
-        if (nComissoes) setComissoes(nComissoes);
-        if (nInsumos) setInsumos(nInsumos);
+        if (nComissoes) setComissoes(nComissoes.includes('%') ? nComissoes : formatCurrency(nComissoes));
+        if (nInsumos) setInsumos(formatCurrency(nInsumos));
       }
     };
 
@@ -192,17 +204,17 @@ const Onboarding = ({ onComplete }) => {
               <h3>2. Custos Fixos (Mensais)</h3>
               <p className="hint">Aqueles que não mudam, independentemente do quanto você vende.</p>
               <div className="grid-inputs">
-                <div className="form-group"><label>Aluguel</label><input type="text" placeholder="R$ 0,00" value={aluguel} onChange={e => setAluguel(e.target.value)} /></div>
-                <div className="form-group"><label>Energia</label><input type="text" placeholder="R$ 0,00" value={energia} onChange={e => setEnergia(e.target.value)} /></div>
-                <div className="form-group"><label>Água</label><input type="text" placeholder="R$ 0,00" value={agua} onChange={e => setAgua(e.target.value)} /></div>
-                <div className="form-group"><label>Material de limpeza</label><input type="text" placeholder="R$ 0,00" value={limpeza} onChange={e => setLimpeza(e.target.value)} /></div>
-                <div className="form-group"><label>Internet / Telefone</label><input type="text" placeholder="R$ 0,00" value={internet} onChange={e => setInternet(e.target.value)} /></div>
-                <div className="form-group"><label>Software / Tráfego</label><input type="text" placeholder="R$ 0,00" value={software} onChange={e => setSoftware(e.target.value)} /></div>
-                <div className="form-group"><label>Contador</label><input type="text" placeholder="R$ 0,00" value={contador} onChange={e => setContador(e.target.value)} /></div>
-                <div className="form-group"><label>Marketing</label><input type="text" placeholder="R$ 0,00" value={marketing} onChange={e => setMarketing(e.target.value)} /></div>
-                <div className="form-group"><label>Pró-labore (Salário do Dono)</label><input type="text" placeholder="R$ 0,00" value={prolabore} onChange={e => setProlabore(e.target.value)} /></div>
-                <div className="form-group"><label>Salários da Equipe (Funcionários)</label><input type="text" placeholder="R$ Soma de todos" value={salarios} onChange={e => setSalarios(e.target.value)} /></div>
-                <div className="form-group"><label>Benefícios da Equipe</label><input type="text" placeholder="R$ 0,00" value={beneficios} onChange={e => setBeneficios(e.target.value)} /></div>
+                <div className="form-group"><label>Aluguel</label><input type="text" placeholder="R$ 0,00" value={aluguel} onChange={e => setAluguel(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Energia</label><input type="text" placeholder="R$ 0,00" value={energia} onChange={e => setEnergia(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Água</label><input type="text" placeholder="R$ 0,00" value={agua} onChange={e => setAgua(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Material de limpeza</label><input type="text" placeholder="R$ 0,00" value={limpeza} onChange={e => setLimpeza(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Internet / Telefone</label><input type="text" placeholder="R$ 0,00" value={internet} onChange={e => setInternet(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Software / Tráfego</label><input type="text" placeholder="R$ 0,00" value={software} onChange={e => setSoftware(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Contador</label><input type="text" placeholder="R$ 0,00" value={contador} onChange={e => setContador(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Marketing</label><input type="text" placeholder="R$ 0,00" value={marketing} onChange={e => setMarketing(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Pró-labore (Salário do Dono)</label><input type="text" placeholder="R$ 0,00" value={prolabore} onChange={e => setProlabore(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Salários da Equipe (Funcionários)</label><input type="text" placeholder="R$ Soma de todos" value={salarios} onChange={e => setSalarios(formatCurrency(e.target.value))} /></div>
+                <div className="form-group"><label>Benefícios da Equipe</label><input type="text" placeholder="R$ 0,00" value={beneficios} onChange={e => setBeneficios(formatCurrency(e.target.value))} /></div>
               </div>
             </div>
           )}
@@ -212,8 +224,17 @@ const Onboarding = ({ onComplete }) => {
               <h3>3. Custos Variáveis</h3>
               <p className="hint">Aqueles que sobem quando você vende mais.</p>
               <div className="grid-inputs">
-                <div className="form-group"><label>Comissões (Total pago no mês)</label><input type="text" placeholder="R$ 0,00 ou %" value={comissoes} onChange={e => setComissoes(e.target.value)} /></div>
-                <div className="form-group"><label>Custos com Produtos / Insumos</label><input type="text" placeholder="R$ 0,00" value={insumos} onChange={e => setInsumos(e.target.value)} /></div>
+                <div className="form-group">
+                  <label>Comissões (Total pago no mês)</label>
+                  <input type="text" placeholder="R$ 0,00 ou %" value={comissoes} onChange={e => {
+                    const v = e.target.value;
+                    setComissoes(v.includes('%') ? v : formatCurrency(v));
+                  }} />
+                </div>
+                <div className="form-group">
+                  <label>Custos com Produtos / Insumos</label>
+                  <input type="text" placeholder="R$ 0,00" value={insumos} onChange={e => setInsumos(formatCurrency(e.target.value))} />
+                </div>
               </div>
             </div>
           )}
