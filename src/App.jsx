@@ -17,30 +17,38 @@ function App() {
   const [isRecording, setIsRecording] = useState(false)
   const [transcriptPreview, setTranscriptPreview] = useState('')
   const recognitionRef = React.useRef(null)
+
+  // Carrega as vozes antecipadamente para o Chrome não devolver array vazio
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
   
   // Função para a Beluna falar com o usuário
   const speakBeluna = (text) => {
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0; // Tom neutro para soar humana e profissional, não sensual/aguda
+    utterance.rate = 1.15; // Velocidade um pouco maior tira a sensação "arrastada/lenta"
+    utterance.pitch = 1.0; 
 
-    // Tenta encontrar a voz mais humana e feminina disponível no navegador
     const voices = synth.getVoices();
-    const ptVoices = voices.filter(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
+    const ptVoices = voices.filter(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR') || v.lang === 'pt');
     
-    // Prioriza vozes femininas de alta qualidade (Chrome, Edge ou iOS)
-    let bestVoice = ptVoices.find(v => 
-      v.name.includes('Google português do Brasil') || // Chrome (Feminina e limpa)
-      v.name.includes('Francisca') || // Edge Natural (Muito humana)
-      v.name.includes('Luciana') || // iOS/Mac
-      v.name.includes('Letícia')
-    );
+    // Procura voz feminina e de rede (que são infinitamente mais naturais)
+    let bestVoice = ptVoices.find(v => {
+      const name = v.name.toLowerCase();
+      return name.includes('google') || name.includes('francisca') || name.includes('luciana') || name.includes('letícia') || name.includes('online');
+    });
 
-    // Se não achar as Premium, tenta pegar qualquer uma que não seja a voz masculina robótica comum (Daniel/Thiago)
     if (!bestVoice && ptVoices.length > 0) {
-      bestVoice = ptVoices.find(v => !v.name.includes('Daniel') && !v.name.includes('Thiago')) || ptVoices[0];
+      // Se não achar a do Google, pega a última disponível (frequentemente a melhor no Windows) pulando o Daniel
+      const femininas = ptVoices.filter(v => !v.name.toLowerCase().includes('daniel') && !v.name.toLowerCase().includes('thiago'));
+      bestVoice = femininas.length > 0 ? femininas[femininas.length - 1] : ptVoices[0];
     }
 
     if (bestVoice) {
