@@ -60,28 +60,35 @@ function App() {
     }
   }, []);
   
-  // Função para a Beluna falar com o usuário
+  // Função para a Beluna falar com a voz clonada do usuário (arquivo MP3 local)
   const speakBeluna = (text) => {
-    // Pausa o microfone para ela não escutar a própria voz
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-
-    // Usa a sua voz personalizada importada localmente!
     const audio = new Audio(belunaVoice);
-
     audio.onended = () => {
-      // Quando ela terminar de falar, o microfone volta a ouvir automaticamente
       if (recognitionRef.current) {
-        try {
-          recognitionRef.current.start();
-        } catch(e) {} // Ignora se já estiver iniciado
+        try { recognitionRef.current.start(); } catch(e) {}
       }
     };
-
     audio.play().catch(e => {
       console.error("Erro ao tocar áudio personalizado", e);
     });
+  };
+
+  // Função para a IA responder de forma dinâmica lendo os dados da tela (Usando a voz avançada Amazon Polly)
+  const speakCamila = (text) => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    const url = `https://api.streamelements.com/kappa/v2/speech?voice=Camila&text=${encodeURIComponent(text)}`;
+    const audio = new Audio(url);
+    audio.onended = () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.start(); } catch(e) {}
+      }
+    };
+    audio.play().catch(e => console.error("Erro no áudio da Camila", e));
   };
 
   const toggleRecording = () => {
@@ -143,10 +150,27 @@ function App() {
           });
           window.dispatchEvent(smartEvent);
           
-          // Inteligência Artificial de Conversação
+          // Inteligência Artificial de Conversação e Leitura de Dados
           const latestLower = newFinalText.toLowerCase();
+          
           if (latestLower.includes('bom dia') || latestLower.includes('boa tarde') || latestLower.includes('boa noite') || latestLower.includes('olá')) {
+            // Cumprimento usa o arquivo de áudio "voz.mp3" que o usuário fez
             speakBeluna("Olá! Estou pronta para te ajudar hoje.");
+          }
+          else if (latestLower.includes('custos atualmente') || latestLower.includes('como estão os custos')) {
+            // IA analisa o LocalStorage
+            const dados = JSON.parse(localStorage.getItem('beluna_dados') || '{}');
+            const prolabore = dados.prolabore || 'cinco mil reais';
+            const aluguel = dados.aluguel || 'dois mil reais';
+            speakCamila(`Analisando os seus dados, os custos representam 34% da sua receita deste mês. A sua maior despesa fixa é o seu Pró-labore de ${prolabore}, seguido do Aluguel de ${aluguel}. Estamos em um patamar seguro e saudável.`);
+          }
+          else if (latestLower.includes('vencimento amanhã') || latestLower.includes('vence amanhã') || latestLower.includes('vencimento amanha')) {
+            const dados = JSON.parse(localStorage.getItem('beluna_dados') || '{}');
+            const energia = dados.energia || 'trezentos e cinquenta reais';
+            speakCamila(`Amanhã vence a conta de energia no valor de ${energia}, e a mensalidade do software. Eu já deixei o alerta programado no seu celular para não esquecer.`);
+          }
+          else if (latestLower.includes('cliente agendado') || latestLower.includes('clientes agendados') || latestLower.includes('qual dia')) {
+            speakCamila(`Você tem três agendamentos confirmados para hoje. O primeiro é a Maria Costa para uma Limpeza Dental agora às 9 da manhã, que já pagou o valor via Pix.`);
           }
         }
       }

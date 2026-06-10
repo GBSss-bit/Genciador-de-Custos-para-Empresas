@@ -50,7 +50,7 @@ const Onboarding = ({ onComplete }) => {
         if (step < 3) {
           setStep((prev) => Math.min(prev + 1, 3));
         } else {
-          onComplete(); // Se falar 'próximo' na última etapa, finaliza e vai pro Dashboard!
+          handleFinish(); // Se falar 'próximo' na última etapa, salva os dados e vai pro Dashboard!
         }
         return; // Para não misturar com o texto dos formulários
       }
@@ -148,6 +148,17 @@ const Onboarding = ({ onComplete }) => {
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 3));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const handleFinish = () => {
+    // Salva todos os dados que o usuário informou para que a Inteligência Artificial possa ler e conversar sobre eles no Dashboard
+    const dadosCadastrados = {
+      empresa, segmento, cidade, colaboradores, tipoEmpresa,
+      aluguel, energia, agua, limpeza, internet, software, contador, marketing, prolabore, salarios, beneficios,
+      comissoes, insumos
+    };
+    localStorage.setItem('beluna_dados', JSON.stringify(dadosCadastrados));
+    onComplete();
+  };
 
   return (
     <div className="onboarding-container">
@@ -252,7 +263,7 @@ const Onboarding = ({ onComplete }) => {
               Próximo <ArrowRight size={18} />
             </button>
           ) : (
-            <button className="btn-success" onClick={onComplete}>
+            <button className="btn-success" onClick={handleFinish}>
               <CheckCircle2 size={18} /> Dashboard
             </button>
           )}
