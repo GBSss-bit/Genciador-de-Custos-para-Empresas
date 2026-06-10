@@ -5,7 +5,6 @@ import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
 import Agendamentos from './Agendamentos'
 import Transacoes from './Transacoes'
-import belunaVoice from './voz.mp3.mp3'
 import './App.css'
 
 class ErrorBoundary extends React.Component {
@@ -57,25 +56,6 @@ function App() {
       window.speechSynthesis.onvoiceschanged = () => {
         window.speechSynthesis.getVoices();
       };
-    }
-  }, []);
-  
-  // Função para a Beluna falar com a voz clonada do usuário (arquivo MP3 local)
-  const speakBeluna = (text) => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    const audio = new Audio(belunaVoice);
-    audio.onended = () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.start(); } catch(e) {}
-      }
-    };
-    audio.play().catch(e => {
-      console.error("Erro ao tocar áudio personalizado", e);
-    });
-  };
-
   // Função para a IA responder de forma dinâmica lendo os dados da tela (Usando a voz avançada Amazon Polly)
   const speakCamila = (text) => {
     if (recognitionRef.current) {
@@ -154,8 +134,7 @@ function App() {
           const latestLower = newFinalText.toLowerCase();
           
           if (latestLower.includes('bom dia') || latestLower.includes('boa tarde') || latestLower.includes('boa noite') || latestLower.includes('olá')) {
-            // Cumprimento usa o arquivo de áudio "voz.mp3" que o usuário fez
-            speakBeluna("Olá! Estou pronta para te ajudar hoje.");
+            speakCamila("Olá! Estou pronta para te ajudar hoje.");
           }
           else if (latestLower.includes('custos atualmente') || latestLower.includes('como estão os custos')) {
             // IA analisa o LocalStorage
