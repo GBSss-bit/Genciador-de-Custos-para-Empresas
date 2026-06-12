@@ -5,3 +5,15 @@ dist
 !.env.example
 *.local
 .DS_Store
+
+# local env files
+.env.local
+.env.*.local
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# electron
+dist-electron
+dist-electron/DS_Store

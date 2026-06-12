@@ -75,9 +75,9 @@ const Sidebar = ({ activeTab, setActiveTab, onReset }) => {
         <div className="nav-section">
           <h4>CONFIGURAÇÕES</h4>
           <ul>
-            <li className={activeTab === 'Preferências' ? 'active' : ''} onClick={() => handleNav('Preferências')}>
+            <li className={activeTab === 'Configurações' ? 'active' : ''} onClick={() => handleNav('Configurações')}>
               <Settings size={18} />
-              <span>Preferências</span>
+              <span>Configurações</span>
             </li>
           </ul>
         </div>

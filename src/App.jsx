@@ -5,6 +5,7 @@ import Onboarding from './Onboarding'
 import Sidebar from './Sidebar'
 import Agendamentos from './Agendamentos'
 import Transacoes from './Transacoes'
+import Configuracoes from './Configuracoes'
 import './App.css'
 
 class ErrorBoundary extends React.Component {
@@ -232,7 +233,8 @@ function App() {
             {activeTab === 'Agendamentos' && <Agendamentos />}
             {activeTab === 'Receitas' && <Transacoes tipo="RECEITA" />}
             {activeTab === 'Despesas' && <Transacoes tipo="DESPESA" />}
-            {activeTab !== 'Dashboard' && activeTab !== 'Agendamentos' && activeTab !== 'Receitas' && activeTab !== 'Despesas' && (
+            {activeTab === 'Configurações' && <Configuracoes />}
+            {activeTab !== 'Dashboard' && activeTab !== 'Agendamentos' && activeTab !== 'Receitas' && activeTab !== 'Despesas' && activeTab !== 'Configurações' && (
               <div className="placeholder-screen">
                 <h2>{activeTab}</h2>
                 <p>Esta tela será construída em breve.</p>
