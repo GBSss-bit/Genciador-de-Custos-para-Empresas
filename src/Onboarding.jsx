@@ -120,25 +120,23 @@ const Onboarding = ({ onComplete }) => {
       }
 
       if (step === 3) {
-        const extractValue = (regex) => {
-          const match = fullText.match(regex);
-          if (match) {
-             let val = match[1].replace(/[^\d,.]/g, ''); // Retira tudo que não for número, vírgula ou ponto
-             if (match[1].includes('%') || match[1].includes('por cento')) {
-               return val ? val + '%' : null;
-             }
-             return val ? val : null;
-          }
-          return null;
-        };
+        // Nova lógica mais inteligente que não quebra se o usuário repetir palavras
+        const nComissoesMatch = fullText.match(/(?:comissões|comissão).*?([\d.,]+(?:\s*%|\s*por cento)?)/i);
+        const nInsumosMatch = fullText.match(/(?:custos com produtos|custo com produto|produtos|insumos|produto|insumo).*?([\d.,]+)/i);
 
-        const stops3 = "comissões|comissão|custos|produtos|insumos|produto|insumo";
-
-        const nComissoes = extractValue(new RegExp(`(?:comissões|comissão)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
-        const nInsumos = extractValue(new RegExp(`(?:custos|produtos|insumos|produto|insumo)\\s+(.*?)(?=\\s+(?:${stops3})|$)`, 'i'));
-
-        if (nComissoes) setComissoes(nComissoes.includes('%') ? nComissoes : formatCurrency(nComissoes));
-        if (nInsumos) setInsumos(formatCurrency(nInsumos));
+        if (nComissoesMatch) {
+            let val = nComissoesMatch[1].replace(/[^\d,.]/g, '');
+            if (nComissoesMatch[0].includes('%') || nComissoesMatch[0].includes('por cento')) {
+                setComissoes(val + '%');
+            } else if (val) {
+                setComissoes(formatCurrency(val));
+            }
+        }
+        
+        if (nInsumosMatch) {
+            let val = nInsumosMatch[1].replace(/[^\d,.]/g, '');
+            if (val) setInsumos(formatCurrency(val));
+        }
       }
     };
 
